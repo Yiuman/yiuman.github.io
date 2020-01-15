@@ -4,7 +4,7 @@ title: '噔噔蹬蹬,终于搭了自己的博客'
 subtitle: '起点'
 date: 2020-01-09
 categories: 技术
-cover: '/assets/img/567.gif'
+cover: '/images/hello/index.gif'
 tags: jekyll blog
 ---
 
@@ -61,19 +61,19 @@ tags: jekyll blog
 
 1. 选择你的仓库，点击setting.
 
-   ![rep_setting](../images/rep_setting.png)
+   ![rep_setting](../images/hello/rep_setting.png)
 
 2. 拉到网页最下面，选择分支
 
-   ![publishing-source-drop-down](../images/publishing-source-drop-down.png)
+   ![publishing-source-drop-down](../images/hello/publishing-source-drop-down.png)
 
 3. 重命名项目
 
-   ![repo_rename](../images/repo_rename.png)
+   ![repo_rename](../images/hello/repo_rename.png)
 
 4. 至此你的GithuaPages边成功发布了，点击仓库的Settings，找到GitHub Pages一项遍可以看到以下内容
 
-![repo_ghp](../images/repo_ghp.png)
+![repo_ghp](../images/hello/repo_ghp.png)
 
 5. 可以通过域名访问你对自己的站点了,如我的https://yiuman.github.io/
 
