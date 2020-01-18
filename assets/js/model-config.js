@@ -2,11 +2,11 @@
     win.modelCollections = [
         {
             name: 'bilibili-live/22',
-            textures: ['default', 'cba-normal','cba-suuper','newyear','school','spring','summer-hight','summer-low','tomo-hight','tomo-low','valley','vdays','xmas']
+            textures: ['default', 'cba-normal','cba-supper','newyear','school','spring','summer-hight','summer-low','tomo-hight','tomo-low','valley','vdays','xmas']
         },
         {
             name: 'bilibili-live/33',
-            textures: ['default', 'cba-normal','cba-suuper','newyear','school','spring','summer-hight','summer-low','tomo-hight','tomo-low','valley','vdays','xmas']
+            textures: ['default', 'cba-normal','cba-supper','newyear','school','spring','summer-hight','summer-low','tomo-hight','tomo-low','valley','vdays','xmas']
         },
         {
             name:'kesyoban',

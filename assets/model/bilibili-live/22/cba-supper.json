@@ -5,9 +5,9 @@
     "model":"model.moc",
     "textures":[
         "texture_00/closet-default-v2.png",
-        "texture_01/school2017-upper.png",
-        "texture_02/school2017-lower.png",
-        "texture_03/school2017-hat.png"
+        "texture_01/cba-super-upper.png",
+        "texture_02/cba-super-lower.png",
+        "texture_03/cba-hat.png"
     ],
     "layout":{
         "center_x": 0,
