@@ -5,19 +5,26 @@
 </div>
 
 <script type="text/javascript">
-    var message_Path = '/assets/';
-    var home_Path = 'https://yiuman.github.io/';
+    const message_Path = '/assets/';
+    const home_Path = 'https://yiuman.github.io/';
 </script>
 <script type="text/javascript" src="/assets/js/live2d.min.js"></script>
 <script type="text/javascript" src="/assets/js/message.js"></script>
 <script type="text/javascript" src="/assets/js/model-config.js"></script>
 <script type="text/javascript">
-    let modelName = '22';
-    let jsonFileName = 'default';
-    let model = modelCollections[Math.floor(Math.random() * modelCollections.length + 1)-1];
-    if(model){
-        modelName = model.name;
-        jsonFileName = model.textures[Math.floor(Math.random() * model.textures.length + 1)-1] || 'default';
+    let randomModel = window.randomModel();
+
+    function watchResize() {
+        let $live2d = $("#live2d");
+        if (media()) {
+            $live2d.attr("width", "100").attr("height", "100");
+        } else {
+            $live2d.attr("width", "280").attr("height", "250");
+        }
+        loadlive2d("live2d", `/assets/model/${randomModel.name}/${randomModel.json}.json`);
     }
-    loadlive2d("live2d", `/assets/model/${modelName}/${jsonFileName}.json`);
+
+    window.addEventListener("resize",watchResize);
+    watchResize();
+
 </script>

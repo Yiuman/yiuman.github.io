@@ -110,6 +110,10 @@ function showHitokoto(){
 }
 
 function showMessage(text, timeout){
+    if(media()){
+        return;
+    }
+
     if(Array.isArray(text)) text = text[Math.floor(Math.random() * text.length + 1)-1];
     //console.log('showMessage', text);
     $('.message').stop();
@@ -135,3 +139,7 @@ function initLive2d (){
     })
 }
 initLive2d ();
+
+function media() {
+    return window.matchMedia('(max-width: 860px)').matches;
+}
