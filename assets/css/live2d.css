@@ -64,13 +64,9 @@
 
 @media (max-width: 860px) {
     #landlord {
-        left: unset;
-        right: 0;
+        display: none;
     }
 
-    .hide-button:hover{
-        display:none ;
-    }
 }
 
 @keyframes shake {

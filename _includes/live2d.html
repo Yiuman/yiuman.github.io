@@ -13,18 +13,5 @@
 <script type="text/javascript" src="/assets/js/model-config.js"></script>
 <script type="text/javascript">
     let randomModel = window.randomModel();
-
-    function watchResize() {
-        let $live2d = $("#live2d");
-        if (media()) {
-            $live2d.attr("width", "100").attr("height", "100");
-        } else {
-            $live2d.attr("width", "280").attr("height", "250");
-        }
-        loadlive2d("live2d", `/assets/model/${randomModel.name}/${randomModel.json}.json`);
-    }
-
-    window.addEventListener("resize",watchResize);
-    watchResize();
-
+    loadlive2d("live2d", `/assets/model/${randomModel.name}/${randomModel.json}.json`);
 </script>
