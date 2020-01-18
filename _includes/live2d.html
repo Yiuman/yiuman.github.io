@@ -10,6 +10,14 @@
 </script>
 <script type="text/javascript" src="/assets/js/live2d.min.js"></script>
 <script type="text/javascript" src="/assets/js/message.js"></script>
+<script type="text/javascript" src="/assets/js/model-config.js"></script>
 <script type="text/javascript">
-    loadlive2d("live2d", "/assets/model/bilibili-live/22/index.json");
+    let modelName = '22';
+    let jsonFileName = 'default';
+    let model = modelCollections[Math.floor(Math.random() * modelCollections.length + 1)-1];
+    if(model){
+        modelName = model.name;
+        jsonFileName = model.textures[Math.floor(Math.random() * model.textures.length + 1)-1] || 'default';
+    }
+    loadlive2d("live2d", `/assets/model/${modelName}/${jsonFileName}.json`);
 </script>

@@ -39,7 +39,6 @@ function initTips(){
         success: function (result){
             $.each(result.mouseover, function (index, tips){
                 $(tips.selector).mouseover(function (){
-                    console.warn(tips)
                     var text = tips.text;
                     if(Array.isArray(tips.text)) text = tips.text[Math.floor(Math.random() * tips.text.length + 1)-1];
                     text = text.renderTip({text: $(this).text()});
@@ -128,7 +127,7 @@ function hideMessage(timeout){
 function initLive2d (){
     $('.hide-button').fadeOut(0).on('click', () => {
         $('#landlord').css('display', 'none')
-    })
+    });
     $('#landlord').hover(() => {
         $('.hide-button').fadeIn(600)
     }, () => {
