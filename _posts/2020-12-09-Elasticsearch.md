@@ -4,7 +4,7 @@ title: 'Elsticsearch学习笔记'
 subtitle: 'Halo，Elsticsearch'
 date: 2020-12-09
 categories: 技术
-cover: '/images/elasticsearch/card.jpeg'
+cover: '/images/elsticsearch/card.jpeg'
 tags: Elsticsearch 全文检索 ES
 ---
 
@@ -85,7 +85,7 @@ PUT /blogs
 
 比如，我们在Google中搜索”**年轻人你不讲武德，我劝你耗子尾汁**“，则出现了以下的匹配内容。
 
-![query](/Users/yiumankam/study&note/query.jpg)
+![query](../images/elsticsearch/query.jpg)
 
 如果，让你自己去设计一个搜索引擎你会怎么去做？
 
