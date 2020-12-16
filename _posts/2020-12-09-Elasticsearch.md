@@ -4,13 +4,13 @@ title: 'Elsticsearch学习笔记'
 subtitle: 'Halo，Elsticsearch'
 date: 2020-12-09
 categories: 技术
-cover: '/images/elsticsearch/card.jpeg'
+cover: '/images/elasticsearch/card.jpeg'
 tags: Elsticsearch 全文检索 ES
 ---
 
 ### Elasticsearch
 
-当前版本为7.10，最新
+版本为7.10.1
 
 > Elasticsearch是Elastic Stack核心的分布式搜索和分析引擎，简称ES。Elasticsearch为所有类型的数据提供近乎实时的搜索和分析。无论您是结构化文本还是非结构化文本，数字数据或地理空间数据，Elasticsearch都能以支持快速搜索的方式有效地对其进行存储和索引。您不仅可以进行简单的数据检索，还可以聚合信息来发现数据中的趋势和模式。随着数据和查询量的增长，Elasticsearch的分布式特性使您的部署可以顺畅地无缝增长。
 
@@ -23,12 +23,12 @@ tags: Elsticsearch 全文检索 ES
 > Elasticsearch是面向文档的,关系行数据库和Elasticsearch客观的对比! 一切都是json
 >
 
-| 关系数据库         | Elasticsearch                                  |
-| ------------------ | ---------------------------------------------- |
-| 数据库（database） | 索引（indices）                                |
-| 表（table）        | 类型（types）(7版本以及之后会被抛弃，默认_doc) |
-| 行（row）          | 文档（documents）                              |
-| 字段（column）     | 字段（fields）                                 |
+| 关系数据库         | Elasticsearch                                      |
+| ------------------ | -------------------------------------------------- |
+| 数据库（database） | 索引（indices）                                    |
+| 表（table）        | 类型（types）(7版本以及之后会被抛弃，默认_doc)     |
+| 行（row）          | 文档（documents）                                  |
+| 字段（column）     | 字段（indices.settings.mapping.properties,fields） |
 
 ##### 索引与文档
 
@@ -85,7 +85,7 @@ PUT /blogs
 
 比如，我们在Google中搜索”**年轻人你不讲武德，我劝你耗子尾汁**“，则出现了以下的匹配内容。
 
-![query](../images/elsticsearch/query.jpg)
+![query](../images/elasticsearch/query.jpg)
 
 如果，让你自己去设计一个搜索引擎你会怎么去做？
 
@@ -103,9 +103,7 @@ PUT /blogs
 
 得到关键字后，就可以进行文档内容的关键字搜索进而得到匹配内容的文档了。
 
-##### 正排
-
-> 由Key查询Value的过程，就是正排索引
+> 遍历文档，搜寻关键字匹配
 
 | 文档编号 | 匹配关键字                       | 匹配个数 |
 | -------- | -------------------------------- | -------- |
@@ -120,7 +118,7 @@ PUT /blogs
 
 ##### 倒排
 
-> 与正排索引相反，用Value查询Key的过程，就是倒排索引
+> 简单的说，用Value查询Key的过程，就是倒排索引
 
 | 匹配关键字 | 文档ID |
 | ---------- | ------ |
@@ -237,6 +235,9 @@ dependencies {
 }
 ```
 
+需要注意一下的是，公司的框架的jar中包含了低版本的lucene包，会有冲突需要排除。冲突JAR为`lucene-analyzers-common-4.6.1.jar`、`lucene-core-4.6.1.jar`
+
+
 
 下面的例子简单的演示Rest客户端使用，具体细节官网都有，这里就不重复了，请**认真看官网，认真看官网，认真看官网！！！**
 
@@ -351,7 +352,54 @@ client.close();
 
 
 
-上面简单的演示了索引的某部分的操作，其他的相关API也与索引的类似，例如创建文档
+##### 关于IK分词器 
+
+> ElasticSearch是有自己的分词器的，但是不满足我们的分词需求，所以使用大名鼎鼎的IK分词器插件对分词进行扩展
+
+###### ik_max_word&ik_smart两个分析器的区别
+
+- ik_max_word		会将文本做最细粒度的拆分，比如会将“中华人民共和国国歌”拆分为“中华人民共和国,中华人民,中华,华人,人民共和国,人民,人,民,共和国,共和,和,国国,国歌”，会穷尽各种可能的组合
+- ik_smart        会做最粗粒度的拆分，比如会将“中华人民共和国国歌”拆分为“中华人民共和国,国歌”
+
+###### 使用分词分析器
+
+> 创建索引或更新索引的时候，定义相关属性，若需要使用分析器则声明，下面例子中JSON是上面创建索引的JSON扩展
+
+```JSON
+{
+    "settings":{
+        "number_of_shards":1,
+        "number_of_replicas":0
+    },
+    "mappings":{
+        "properties":{
+            "title":{
+                "type":"text"
+            },
+            "summary":{
+                "type":"text"
+            },
+            "author":{
+                "type":"text"
+            },
+            "publishTime":{
+                "type":"date"
+            },
+          	"content":{
+               "type": "text",
+               "analyzer": "ik_max_word",
+               "search_analyzer": "ik_smart"
+            }
+        }
+    }
+}
+```
+
+
+
+##### 关于文档的基本操作
+
+###### 创建文档
 
 ```java
 //创建文档对象(例如你的某个对象)，这里用舆情类进行展示
@@ -376,6 +424,199 @@ indexRequest.source(sentiment);
 IndexResponse index = client.index(indexRequest, RequestOptions.DEFAULT);
 client.close()
 ```
+
+###### 简单搜索
+
+> 匹配+排序，这里需要注意下，如果使用了排序ES默认是不会算分数的，如果要算分数，则要加上"track_scores":"true"
+
+```java
+GET /sentiment/_search
+{
+  "query": {
+    "term": {
+      "author": "小甘同学"
+    }
+  },
+  "track_scores":"true",
+  "sort": {
+    "id":{
+      "order":"desc"
+    }
+  }
+}
+
+//java
+SearchRequest searchRequest = new SearchRequest("sentiment");
+SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+searchSourceBuilder.query(QueryBuilders.matchQuery("author", "小甘同学"));
+searchSourceBuilder.sort("id", SortOrder.DESC);
+searchRequest.source(searchSourceBuilder);
+SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
+```
+
+###### [复合搜索](https://www.elastic.co/guide/en/elasticsearch/reference/current/compound-queries.html)
+
+复合搜索有多种，分别为
+
+- [布尔查询](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html)（bool query）  **用于组合多个条件或复合句的默认查询**
+- [提高查询](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-boosting-query.html)（boosting query）**布尔查询会排除掉不匹配的文档，而提交查询则不会排除只会降下文档的匹配度**
+- [固定分数查询](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-constant-score-query.html)（constant_score query）**指定固定的分数，一般都结合filter进行使用**
+- [最佳匹配查询](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-constant-score-query.html)（dis_max query）**只会返回得分最大的文档**
+- [函数分数查询](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-function-score-query.html)（function_score query）**用于处理文档得分过程的查询**
+
+> 下面只对最常用的**布尔查询**进行讲解，其他的复合查询方式请阅读官网
+
+布尔查询包含4中操作符，分别为
+
+- must  必须匹配 ，会贡献分数 `and`  
+- must_not 必须不匹配，不会贡献分数 `not`
+- should  选择性匹配，至少满足一条 ，贡献分数 `or`
+- filter  过滤子句，必须匹配，不贡献分数 
+
+常用的条件操作符有
+
+- term 精确查询 `=` 
+- match  匹配查询 `like` **支持全文检索及分词器** 
+- range 范围查询 `gt`、`gte`、`lt`、`lte`
+
+例子:查询作者为`小甘同学`，关键字为`猪乸`且发布时间大于等于`2020-10-10`的数据
+
+```java
+POST _search
+{
+  "query": {
+    "bool" : {
+      "must" : {
+        "term" : { "authoer" : "小甘同学" }
+      },
+      "filter": {
+        "term" : { "keyword" : "猪乸" }
+      },
+      "must_not" : {
+        "range" : {
+          "publishTime" : { "gte" : "2020-10-10" }
+        }
+      }
+    }
+  }
+}
+
+//java
+SearchRequest searchRequest = new SearchRequest("sentiment");
+BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+boolQueryBuilder.must(QueryBuilders.termsQuery("author"，"”小甘同学"));
+boolQueryBuilder.filter(QueryBuilders.termsQuery("keyword"，"猪乸"));
+boolQueryBuilder.must_not(QueryBuilders.rangeQuery("publishTime"，"2020-10-10"));
+searchRequest.source(boolQueryBuilder);
+SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
+```
+
+###### 分页查询
+
+> Elasticsearch中的对与数据量较小的分页很简单，只要在查询中添加分页条件(`form`，`size`)则可
+
+- 简单分页
+
+```java
+GET /_search
+{
+  "from": 5,
+  "size": 20,
+  "query": {
+    "match": {
+      "author": "小甘同学"
+    }
+  }
+}
+
+SearchRequest searchRequest = new SearchRequest("sentiment");
+SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+searchSourceBuilder.query(QueryBuilders.matchQuery("author", "小甘同学"));
+searchSourceBuilder.from(5)
+searchSourceBuilder.size(20)
+searchRequest.source(searchSourceBuilder);
+SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
+```
+
+> 当查询匹配的数据量大的时候，使用分页条件则会失效，Elasticsearch的最大数据量是10000，这种时候就要使用`scrollId`深度分页（游标分页）或者`search_after`深度分页进行处理
+
+因为游标分页会缓存数据到内存，若使用不当或者清理不及时会引发内存问题，So，一般用户搜索，比较频繁的查询的情况下建议使用search_after分页处理，下面也只对search_after的使用进行说明 。
+
+注意，使用search_after分页的时候最好添加排序字段，防止分页出现问题
+
+Search_after的使用方式其实就是将上一次查出来的数据最后一条数据的排序值添加到下一次查询中去使用。
+
+```java
+//第一次请求
+GET /sentiment/_search
+{
+     "size": 5,
+     "query": {
+          "match": {
+               "author": "云浮"
+          }
+     },
+     "sort": {
+          "id": "asc",
+          "publishTime": "desc"
+     }
+}
+
+//第一次请求返回数据
+{
+  ...
+  "hits":[
+    ...
+    {
+      ....,
+     "sortValues":["1f46c01879746f8c7e215a1ff064734d"]
+    }    
+  ]
+}
+
+
+//第二次请求
+GET /sentiment/_search
+{
+     "size": 5,
+     "query": {
+          "match": {
+               "author": "云浮"
+          }
+     },
+     "sort": {
+          "id": "asc",
+          "publishTime": "desc"
+     },
+  	 "search_after":["1f46c01879746f8c7e215a1ff064734d"]
+}
+
+//java
+//第一次请求
+SearchRequest searchRequest1 = new SearchRequest("sentiment");
+SearchSourceBuilder searchSourceBuilder1 = new SearchSourceBuilder();
+searchSourceBuilder1.query(QueryBuilders.matchQuery("author", "云浮"));
+searchSourceBuilder1.sort("id");
+searchSourceBuilder1.size(10);
+SearchResponse searchResponse1 = client.search(searchRequest1, RequestOptions.DEFAULT);
+//第二次请求
+SearchRequest searchRequest2 = new SearchRequest("sentiment");
+SearchSourceBuilder searchSourceBuilder2 = new SearchSourceBuilder();
+searchSourceBuilder2.query(QueryBuilders.matchQuery("author", "云浮"));
+searchSourceBuilder2.sort("id");
+//这里添加searchAfter参数
+searchSourceBuilder2.searchAfter(searchResponse1.getHits().getHits()[9].getSortValues());
+searchSourceBuilder2.size(10);
+SearchResponse searchResponse2 = client.search(searchRequest2, RequestOptions.DEFAULT);
+
+```
+
+
+
+#### 遇到的问题
+
+- 创建索引的时候不声明mapping信息，保存文档的时候ES会自动根据文档字段信息去构建mapping，会将大部分字段定义为type="text"的类型，而text类型字段是不支持排序的！！！
+  - **解决**：创建索引的时候尽量自定义mapping信息，至少将主键设置为keyword或number类型数据，让查询至少有排序可用
 
 
 
