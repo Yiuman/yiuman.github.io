@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 'Elsticsearch学习笔记'
-subtitle: 'Halo，Elsticsearch'
+subtitle: 'Halo，Elasticsearch'
 date: 2020-12-09
 categories: 技术
 cover: '/images/elasticsearch/card.jpeg'
